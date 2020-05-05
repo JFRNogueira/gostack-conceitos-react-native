@@ -13,7 +13,6 @@ import {
 import api from './services/api';
 
 export default function App() {
-  console.log('Início');
 
   const [repositories, setRepositories] = useState([]);
 
@@ -22,16 +21,24 @@ export default function App() {
       .get('repositories')
       .then((response) => {
         setRepositories(response.data);
-        console.log(repositories);
       })
       .catch((error) => console.log('GET repositories error >> ' + error));
   }, []);
 
   async function handleLikeRepository(id) {
-    const response = await api.post('repositories/' + id + "/like")
-    api.get('repositories').then(response => {
-      setRepositories(response.data)
+    const response = await api.post(`repositories/${id}/like`)
+
+    const likedRepository = response.data
+
+    const repositoriesUpdated = repositories.map( repository => {
+      if (repository.id === id) {
+        return likedRepository;
+      } else {
+        return repository;
+      }
     })
+
+    setRepositories(repositoriesUpdated)
   }
 
   return (
@@ -56,14 +63,13 @@ export default function App() {
                 style={styles.likeText}
                 testID={`repository-likes-${repository.id}`}
                 >
-                {repository.likes} curtidas
+                {repository.likes} curtida{repository.likes > 1 ? 's' : ''}
               </Text>
             </View>
 
             <TouchableOpacity
               style={styles.button}
               onPress={() => handleLikeRepository(repository.id)}
-              // Remember to replace "1" below with repository ID: {`like-button-${repository.id}`}
               testID={`like-button-${repository.id}`}
               >
               <Text style={styles.buttonText}>Curtir</Text>
